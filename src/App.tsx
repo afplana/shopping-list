@@ -1,6 +1,7 @@
 import { FunctionComponent, useEffect, useState } from 'react';
 import Alert from './Alert'
 import List from './List'
+import AdComponent from './AdComponent'
 
 import { ShoppingItem, AlertStatus, AlertType } from './types'
 
@@ -72,6 +73,9 @@ const App: FunctionComponent = () => {
 
   return (
     <section className="section-center">
+      <div>
+        <AdComponent />
+      </div>
       <form onSubmit={handleSubmit} className="grocery-form">
         {alert.show && <Alert {...alert} removeAlert={showAlert} itemList={list} />}
         <h3>shopping list</h3>
