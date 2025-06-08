@@ -1,5 +1,5 @@
 import { FunctionComponent, useEffect } from 'react';
-import { ShoppingItem } from './types';
+import { ShoppingItem } from '../types';
 
 
 interface Props {
