@@ -73,9 +73,6 @@ const App: FunctionComponent = () => {
 
   return (
     <section className="section-center">
-      <div>
-        <AdComponent />
-      </div>
       <form onSubmit={handleSubmit} className="grocery-form">
         {alert.show && <Alert {...alert} removeAlert={showAlert} itemList={list} />}
         <h3>shopping list</h3>
@@ -86,6 +83,9 @@ const App: FunctionComponent = () => {
           </button>
         </div>
       </form>
+
+      <AdComponent />
+
       {list.length > 0 && (
         <div className="grocery-container">
           <List items={list} removeItem={removeItem} editItem={editItem} />
