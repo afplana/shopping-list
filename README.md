@@ -44,3 +44,14 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Known Issues & Fixes to Prioritize
+- Ads: `src/components/AdComponent.tsx` injects AdSense without loading the Google script; add the loader, gate ads in development, and add a real consent/opt-in flow (currently only mentioned in Privacy).
+- Analytics/Consent: Privacy page claims Google Analytics usage, but no GA code or consent handling exists; either implement analytics with consent or update the copy.
+- Persistence: FastList writes to `localStorage` without guards; wrap in try/catch and provide a fallback for SSR/restrictive browsers.
+- Validation: Inputs are not trimmed, so blank/whitespace items can be added; `handleSubmit` uses `any` for the event and should be typed.
+- Accessibility/UX: Buttons lack aria labels, the form has no labels, nav uses inline styles, and there are no explicit focus/active states beyond defaults.
+- Type/Enum coupling: `AlertType.NULL` is an empty string; consider a nullable/union type instead to avoid ambiguity.
+- Outdated stack: CRA 4 + React 17 + `react-router-dom@6.30.1` still uses `ReactDOM.render`; move to `createRoot` or upgrade to a modern setup (Vite or CRA 5/React 18).
+- Testing: Only default scripts exist; add coverage for add/edit/delete/clear/persist behaviors.
+- Security/SEO: No Helmet/meta handling, CSP, service worker, or environment separation for ad/analytics keys.

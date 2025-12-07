@@ -9,10 +9,11 @@ const App: React.FC = () => (
   <>
     <NavBar />
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/fast-list" element={<FastList />} />
+      <Route path="/" element={<FastList />} />
+      <Route path="/home" element={<Home />} />
       <Route path="/about" element={<About />} />
       <Route path="/privacy" element={<Privacy />} />
+      <Route path="*" element={<FastList />} />
     </Routes>
   </>
 );

@@ -1,10 +1,10 @@
 import { FunctionComponent, useEffect } from 'react';
-import { ShoppingItem } from '../types';
+import { ShoppingItem, AlertType } from '../types';
 
 
 interface Props {
     msg: string;
-    type: string;
+    type: AlertType | null;
     removeAlert: () => void;
     itemList: ShoppingItem[];
 }
@@ -18,7 +18,8 @@ const Alert: FunctionComponent<Props> = ({ msg, type, removeAlert, itemList }) =
         return () => clearTimeout(timeout);
     }, [itemList, removeAlert]);
 
-    return <p className={`alert alert-${type}`}>{msg}</p>
+    const alertClass = type ? `alert alert-${type}` : 'alert';
+    return <p className={alertClass}>{msg}</p>
 }
 
 export default Alert

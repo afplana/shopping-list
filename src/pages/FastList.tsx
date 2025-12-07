@@ -1,99 +1,234 @@
-import { FunctionComponent, useEffect, useState } from 'react';
-import Alert from '../components/Alert'
-import List from '../List'
-import AdComponent from '../components/AdComponent'
+import { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import Alert from '../components/Alert';
+import List from '../List';
+import AdComponent from '../components/AdComponent';
+import ConsentBanner from '../components/ConsentBanner';
 
-import { ShoppingItem, AlertStatus, AlertType } from '../types'
+import { ShoppingItem, AlertStatus, AlertType, AlertTypes, ConsentPreference, CATEGORIES, Category } from '../types';
+
+const STORAGE_KEY = 'list';
+const CONSENT_KEY = 'adsConsent';
+const migrateItem = (item: ShoppingItem | any): ShoppingItem => ({
+    id: item.id,
+    title: item.title,
+    category: item.category && CATEGORIES.includes(item.category) ? item.category : 'Other',
+    completed: typeof item.completed === 'boolean' ? item.completed : false,
+});
 
 const getLocalStorage: (() => ShoppingItem[]) = () => {
-    let list = localStorage.getItem('list');
-    if (list) {
-        return JSON.parse(list) as ShoppingItem[];
-    } else {
-        return [] as ShoppingItem[];
+    if (typeof window === 'undefined') return [];
+    try {
+        const list = window.localStorage.getItem(STORAGE_KEY);
+        return list ? (JSON.parse(list) as ShoppingItem[]).map(migrateItem) : [];
+    } catch (error) {
+        console.warn('Unable to read localStorage, falling back to empty list.', error);
+        return [];
     }
-}
+};
 
-const emptyShoppingItems: ShoppingItem[] = []
-const alertStatus: AlertStatus = { show: false, msg: '', type: AlertType.NULL }
+const getConsentPreference = (): ConsentPreference => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const value = window.localStorage.getItem(CONSENT_KEY);
+        if (value === 'granted' || value === 'denied') {
+            return value;
+        }
+        return null;
+    } catch (error) {
+        console.warn('Unable to read consent from localStorage, defaulting to null.', error);
+        return null;
+    }
+};
+
+const emptyShoppingItems: ShoppingItem[] = [];
+const alertStatus: AlertStatus = { show: false, msg: '', type: null };
 const editingId: string = '';
 
 const FastList: FunctionComponent = () => {
     const [name, setName] = useState('');
+    const [category, setCategory] = useState<Category>('Grocery');
     const [list, setList] = useState(getLocalStorage);
     const [isEditing, setIsEditing] = useState(false);
     const [editID, setEditID] = useState(editingId);
     const [alert, setAlert] = useState(alertStatus);
+    const [adsConsent, setAdsConsent] = useState<ConsentPreference>(getConsentPreference);
+    const [filterCategory, setFilterCategory] = useState<Category | 'All'>('All');
+    const [hideCompleted, setHideCompleted] = useState(false);
 
-    const handleSubmit = (e: any) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!name) {
-            showAlert(true, AlertType.DANGER, 'please enter value');
-        } else if (name && isEditing) {
+        const trimmedName = name.trim();
+        if (!trimmedName) {
+            showAlert(true, AlertTypes.DANGER, 'please enter value');
+            return;
+        }
+
+        if (isEditing) {
             setList(list.map((it) => {
                 if (it.id === editID) {
-                    return { ...it, title: name }
+                    return { ...it, title: trimmedName, category };
                 }
-                return it
+                return it;
             }));
             setName('');
+            setCategory('Grocery');
             setEditID('');
             setIsEditing(false);
-            showAlert(true, AlertType.SUCCESS, 'value updated');
+            showAlert(true, AlertTypes.SUCCESS, 'value updated');
         } else {
-            showAlert(true, AlertType.SUCCESS, 'item added to the list');
-            const newItem = { id: new Date().getTime().toString(), title: name };
+            showAlert(true, AlertTypes.SUCCESS, 'item added to the list');
+            const newItem: ShoppingItem = { id: new Date().getTime().toString(), title: trimmedName, category, completed: false };
             setList([...list, newItem]);
             setName('');
+            setCategory('Grocery');
         }
-    }
+    };
 
-    const showAlert = (show = false, type = AlertType.NULL, msg = '') => setAlert({ show, type, msg })
+    const showAlert = (show = false, type: AlertType | null = null, msg = '') => setAlert({ show, type, msg });
 
     const clearList = () => {
-        showAlert(true, AlertType.DANGER, 'empty list');
+        showAlert(true, AlertTypes.DANGER, 'empty list');
         setList(emptyShoppingItems);
-    }
+    };
 
     const removeItem = (id: string) => {
-        showAlert(true, AlertType.DANGER, 'item removed');
+        showAlert(true, AlertTypes.DANGER, 'item removed');
         setList(list.filter((item) => item.id !== id));
-    }
+    };
 
     const editItem = (id: string) => {
-        const selectedItem: ShoppingItem = list.filter((item) => item.id === id)[0];
+        const selectedItem: ShoppingItem | undefined = list.find((item) => item.id === id);
+        if (!selectedItem) {
+            showAlert(true, AlertTypes.DANGER, 'item not found');
+            return;
+        }
         setIsEditing(true);
         setEditID(id);
-        setName(selectedItem.title)
-    }
+        setName(selectedItem.title);
+        setCategory(selectedItem.category);
+    };
+
+    const toggleComplete = (id: string) => {
+        setList(list.map((item) => item.id === id ? { ...item, completed: !item.completed } : item));
+    };
+
+    const clearCompleted = () => {
+        setList(list.filter((item) => !item.completed));
+        showAlert(true, AlertTypes.SUCCESS, 'completed items cleared');
+    };
 
     useEffect(() => {
-        localStorage.setItem('list', JSON.stringify(list));
+        try {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        } catch (error) {
+            console.warn('Unable to write list to localStorage.', error);
+        }
     }, [list]);
 
-    return (
-        <>
-            <AdComponent />
-            <section className="section-center">
-                <form onSubmit={handleSubmit} className="grocery-form">
-                    {alert.show && <Alert {...alert} removeAlert={showAlert} itemList={list} />}
-                    <h3>shopping list</h3>
-                    <div className="form-control">
-                        <input type="text" className="grocery" placeholder="e.g. eggs" value={name} onChange={(e) => setName(e.target.value)} />
-                        <button type="submit" className="submit-btn">
-                            {isEditing ? 'edit' : 'submit'}
-                        </button>
-                    </div>
-                </form>
+    const filteredList = useMemo(() => {
+        return list.filter((item) => {
+            const categoryMatch = filterCategory === 'All' ? true : item.category === filterCategory;
+            const completionMatch = hideCompleted ? !item.completed : true;
+            return categoryMatch && completionMatch;
+        });
+    }, [filterCategory, hideCompleted, list]);
 
-                {list.length > 0 && (
-                    <div className="grocery-container">
-                        <List items={list} removeItem={removeItem} editItem={editItem} />
-                        <button className="clear-btn" onClick={clearList}>clear items</button>
+    const handleConsentChange = (value: ConsentPreference) => {
+        setAdsConsent(value);
+        try {
+            if (value) {
+                window.localStorage.setItem(CONSENT_KEY, value);
+            } else {
+                window.localStorage.removeItem(CONSENT_KEY);
+            }
+        } catch (error) {
+            console.warn('Unable to persist consent preference.', error);
+        }
+    };
+
+    return (
+        <section className="section-center">
+            <form onSubmit={handleSubmit} className="grocery-form">
+                {alert.show && <Alert {...alert} removeAlert={showAlert} itemList={list} />}
+                <h3>shopping list</h3>
+                <div className="form-control">
+                    <label htmlFor="item-input" className="sr-only">Item name</label>
+                    <input
+                        id="item-input"
+                        type="text"
+                        className="grocery"
+                        placeholder="e.g. eggs"
+                        value={name}
+                        autoFocus
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <select
+                        aria-label="Item category"
+                        className="category-select"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value as Category)}
+                    >
+                        {CATEGORIES.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                    <button type="submit" className="submit-btn">
+                        {isEditing ? 'edit' : 'submit'}
+                    </button>
+                </div>
+            </form>
+
+            <div className="controls-row">
+                <div className="quick-add">
+                    <span className="quick-add-label">Quick add:</span>
+                    {['Milk', 'Bread', 'Shampoo', 'Soap', 'Batteries'].map((item) => (
+                        <button
+                            key={item}
+                            type="button"
+                            className="chip chip-ghost"
+                            onClick={() => {
+                                setName(item);
+                                setCategory(item === 'Shampoo' || item === 'Soap' ? 'Personal Care' : item === 'Batteries' ? 'Electronics' : 'Grocery');
+                            }}
+                        >
+                            {item}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="controls-row">
+                <div className="chips">
+                    {['All', ...CATEGORIES].map((cat) => (
+                        <button
+                            key={cat}
+                            type="button"
+                            className={`chip ${filterCategory === cat ? 'chip-active' : ''}`}
+                            onClick={() => setFilterCategory(cat as Category | 'All')}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                </div>
+                <label className="toggle">
+                    <input type="checkbox" checked={hideCompleted} onChange={(e) => setHideCompleted(e.target.checked)} />
+                    <span>Hide completed</span>
+                </label>
+            </div>
+
+            {list.length > 0 && (
+                <div className="grocery-container">
+                    <List items={filteredList} removeItem={removeItem} editItem={editItem} toggleComplete={toggleComplete} />
+                    <div className="actions-row">
+                        <button className="clear-btn" onClick={clearList}>clear all</button>
+                        <button className="clear-btn" onClick={clearCompleted}>clear completed</button>
                     </div>
-                )}
-            </section>
-        </>
+                </div>
+            )}
+
+            <AdComponent consent={adsConsent === 'granted'} />
+            <ConsentBanner visible={adsConsent === null} onSetConsent={handleConsentChange} />
+        </section>
     );
 }
 
