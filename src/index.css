@@ -231,6 +231,7 @@ Grocery List
   display: flex;
   justify-content: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .grocery {
@@ -241,7 +242,7 @@ Grocery List
   border-bottom-left-radius: var(--radius);
   border-color: transparent;
   font-size: 1rem;
-  flex: 1 0 auto;
+  flex: 1 1 100%;
   color: var(--clr-grey-5);
 }
 
@@ -252,6 +253,7 @@ Grocery List
   background: var(--clr-white);
   color: var(--clr-grey-2);
   font-weight: 600;
+  flex: 1 1 100%;
 }
 
 .grocery::placeholder {
@@ -262,7 +264,7 @@ Grocery List
 .submit-btn {
   background: var(--clr-primary-8);
   border-color: transparent;
-  flex: 0 0 5rem;
+  flex: 1 1 100%;
   display: grid;
   align-items: center;
   padding: 0.25rem;
@@ -274,6 +276,24 @@ Grocery List
   content: var(--clr-primary-5);
   transition: var(--transition);
   font-size: 0.85rem;
+}
+
+@media screen and (min-width: 640px) {
+  .form-control {
+    flex-wrap: nowrap;
+  }
+
+  .grocery {
+    flex: 1 1 auto;
+  }
+
+  .category-select {
+    flex: 0 0 auto;
+  }
+
+  .submit-btn {
+    flex: 0 0 5rem;
+  }
 }
 
 .submit-btn:hover {
