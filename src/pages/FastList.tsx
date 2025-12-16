@@ -63,6 +63,14 @@ const FastList: FunctionComponent = () => {
             return;
         }
 
+        const duplicate = list.some(
+            (it) => it.title.toLowerCase() === trimmedName.toLowerCase() && it.id !== editID
+        );
+        if (duplicate) {
+            showAlert(true, AlertTypes.DANGER, 'item already exists');
+            return;
+        }
+
         if (isEditing) {
             setList(list.map((it) => {
                 if (it.id === editID) {
@@ -126,12 +134,14 @@ const FastList: FunctionComponent = () => {
     }, [list]);
 
     const filteredList = useMemo(() => {
+        const term = name.trim().toLowerCase();
         return list.filter((item) => {
             const categoryMatch = filterCategory === 'All' ? true : item.category === filterCategory;
             const completionMatch = hideCompleted ? !item.completed : true;
-            return categoryMatch && completionMatch;
+            const searchMatch = term ? item.title.toLowerCase().includes(term) : true;
+            return categoryMatch && completionMatch && searchMatch;
         });
-    }, [filterCategory, hideCompleted, list]);
+    }, [filterCategory, hideCompleted, list, name]);
 
     const handleConsentChange = (value: ConsentPreference) => {
         setAdsConsent(value);
@@ -150,7 +160,7 @@ const FastList: FunctionComponent = () => {
         <section className="section-center">
             <form onSubmit={handleSubmit} className="grocery-form">
                 {alert.show && <Alert {...alert} removeAlert={showAlert} itemList={list} />}
-                <h3>shopping list</h3>
+                <h3>Fast Items</h3>
                 <div className="form-control">
                     <label htmlFor="item-input" className="sr-only">Item name</label>
                     <input

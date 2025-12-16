@@ -31,7 +31,7 @@ describe('App routing', () => {
         <App />
       </MemoryRouter>
     );
-    expect(screen.getByRole('heading', { name: /shopping list/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /fast items/i })).toBeInTheDocument();
   });
 });
 
@@ -58,6 +58,37 @@ describe('FastList interactions', () => {
     await fillItem('   ');
     const finalItems = screen.queryAllByRole('article');
     expect(finalItems.length).toBe(initialItems.length);
+  });
+
+  it('blocks duplicate items (case-insensitive)', async () => {
+    render(<FastList />);
+
+    await fillItem('Milk', 'Grocery');
+    await fillItem('milk', 'Grocery');
+
+    expect(await screen.findByText(/item already exists/i)).toBeInTheDocument();
+    const items = screen.getAllByRole('article');
+    expect(items).toHaveLength(1);
+  });
+
+  it('filters the list live while typing a new item', async () => {
+    render(<FastList />);
+
+    await fillItem('Milk', 'Grocery');
+    await fillItem('Bread', 'Grocery');
+
+    const input = screen.getByPlaceholderText('e.g. eggs');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'br');
+
+    const visibleItems = screen.getAllByRole('article');
+    expect(visibleItems.some((node) => within(node).queryByText('Bread'))).toBe(true);
+    expect(visibleItems.some((node) => within(node).queryByText('Milk'))).toBe(false);
+
+    await userEvent.clear(input);
+    const allItems = screen.getAllByRole('article');
+    expect(allItems.some((node) => within(node).queryByText('Bread'))).toBe(true);
+    expect(allItems.some((node) => within(node).queryByText('Milk'))).toBe(true);
   });
 
   it('filters by category and respects hide completed', async () => {
