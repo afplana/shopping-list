@@ -55,3 +55,11 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 - Outdated stack: CRA 4 + React 17 + `react-router-dom@6.30.1` still uses `ReactDOM.render`; move to `createRoot` or upgrade to a modern setup (Vite or CRA 5/React 18).
 - Testing: Only default scripts exist; add coverage for add/edit/delete/clear/persist behaviors.
 - Security/SEO: No Helmet/meta handling, CSP, service worker, or environment separation for ad/analytics keys.
+
+## Mobile App Plan (Android-first)
+- Platform: Start with an Expo-managed React Native app (Android focus first; add iOS later). Android publisher setup is cheaper and quicker than Apple’s paid developer program.
+- Shared logic: Extract list types, validation (trim/duplicate checks), filtering, and consent/state logic into a shared module (e.g., `src/shared`). Keep platform-specific UI and storage separate.
+- Storage abstraction: Add a storage interface; use `localStorage` on web and `AsyncStorage` on mobile via an adapter so persistence behavior stays consistent.
+- UI port: Rebuild FastList with React Native primitives (`View`, `Text`, `TextInput`, `Pressable`, `FlatList`) and `@expo/vector-icons`. Replace chips/toggles with touch-friendly components and add proper focus/active states.
+- Navigation & consent: Use `@react-navigation/native` for screens. Implement consent and ads with native-friendly options (e.g., AdMob via `expo-ads-admob` or other SDKs) and platform-appropriate consent flows (IAB/TCF where required).
+- Testing & CI: Keep unit tests for shared logic; add React Native testing (e.g., `@testing-library/react-native`) and device/Emulator smoke tests. Wire CI to build Android APK/AAB (Play Store later) and optionally run EAS build for distribution.
