@@ -71,6 +71,17 @@ describe('FastList interactions', () => {
     expect(items).toHaveLength(1);
   });
 
+  it('trims input before duplicate checks', async () => {
+    render(<FastList />);
+
+    await fillItem('Milk', 'Grocery');
+    await fillItem('  milk  ', 'Grocery');
+
+    expect(await screen.findByText(/item already exists/i)).toBeInTheDocument();
+    const items = screen.getAllByRole('article');
+    expect(items).toHaveLength(1);
+  });
+
   it('filters the list live while typing a new item', async () => {
     render(<FastList />);
 
