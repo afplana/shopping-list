@@ -1,5 +1,5 @@
 const Home: React.FC = () => (
-    <main style={{ maxWidth: 800, margin: '2rem auto', lineHeight: 1.6 }}>
+    <main className="content-page">
         <h1>Welcome to Fast-List</h1>
         <p>
             Fast-List is a minimalist, in-browser shopping-list tool designed for speed and simplicity.

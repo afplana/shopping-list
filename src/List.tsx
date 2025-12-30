@@ -24,8 +24,22 @@ const List: FunctionComponent<Props> = ({ items, removeItem, editItem, toggleCom
                         <span className="pill">{category}</span>
                     </div>
                     <div className="btn-container">
-                        <button className="edit-btn" onClick={() => editItem(id)}><FaEdit /></button>
-                        <button className="delete-btn" onClick={() => removeItem(id)}><FaTrash /></button>
+                        <button
+                            type="button"
+                            className="edit-btn"
+                            aria-label={`Edit ${title}`}
+                            onClick={() => editItem(id)}
+                        >
+                            <FaEdit />
+                        </button>
+                        <button
+                            type="button"
+                            className="delete-btn"
+                            aria-label={`Delete ${title}`}
+                            onClick={() => removeItem(id)}
+                        >
+                            <FaTrash />
+                        </button>
                     </div>
                 </article>
             );

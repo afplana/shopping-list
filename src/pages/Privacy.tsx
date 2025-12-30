@@ -1,5 +1,5 @@
 const Privacy: React.FC = () => (
-    <main style={{ maxWidth: 800, margin: '2rem auto', lineHeight: 1.6 }}>
+    <main className="content-page">
         <h1>Privacy Policy</h1>
         <p>Last updated: June 8, 2025</p>
         <h2>Information We Collect</h2>

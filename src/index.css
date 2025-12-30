@@ -479,6 +479,36 @@ Grocery List
   border: 0;
 }
 
+.content-page {
+  max-width: 800px;
+  margin: 2rem auto;
+  line-height: 1.6;
+  padding: 0 1rem;
+}
+
+.grocery:focus-visible,
+.category-select:focus-visible,
+.toggle input:focus-visible,
+.nav-links a:focus-visible,
+.submit-btn:focus-visible,
+.clear-btn:focus-visible,
+.chip:focus-visible,
+.edit-btn:focus-visible,
+.delete-btn:focus-visible,
+.btn:focus-visible {
+  outline: 3px solid var(--clr-primary-5);
+  outline-offset: 2px;
+}
+
+.submit-btn:active,
+.clear-btn:active,
+.chip:active,
+.edit-btn:active,
+.delete-btn:active,
+.nav-links a:active {
+  transform: translateY(1px);
+}
+
 .top-nav {
   position: sticky;
   top: 0;

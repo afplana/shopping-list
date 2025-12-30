@@ -172,7 +172,9 @@ const FastList: FunctionComponent = () => {
                         autoFocus
                         onChange={(e) => setName(e.target.value)}
                     />
+                    <label htmlFor="category-select" className="sr-only">Item category</label>
                     <select
+                        id="category-select"
                         aria-label="Item category"
                         className="category-select"
                         value={category}

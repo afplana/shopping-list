@@ -82,6 +82,15 @@ describe('FastList interactions', () => {
     expect(items).toHaveLength(1);
   });
 
+  it('adds accessible labels for edit and delete actions', async () => {
+    render(<FastList />);
+
+    await fillItem('Milk', 'Grocery');
+
+    expect(screen.getByRole('button', { name: /edit milk/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete milk/i })).toBeInTheDocument();
+  });
+
   it('filters the list live while typing a new item', async () => {
     render(<FastList />);
 

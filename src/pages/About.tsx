@@ -1,5 +1,5 @@
 const About: React.FC = () => (
-    <main style={{ maxWidth: 800, margin: '2rem auto', lineHeight: 1.6 }}>
+    <main className="content-page">
         <h1>About Fast-List</h1>
         <p>
             Fast-List was built by a solo developer who wanted a no-frills way to jot down lists on the go.
