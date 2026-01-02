@@ -91,6 +91,26 @@ describe('FastList interactions', () => {
     expect(screen.getByRole('button', { name: /delete milk/i })).toBeInTheDocument();
   });
 
+  it('handles localStorage write failures gracefully', async () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const storageSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('write blocked');
+    });
+
+    render(<FastList />);
+    await fillItem('Milk', 'Grocery');
+
+    const milkItem = screen.getAllByRole('article').find((node) => within(node).queryByText('Milk'));
+    expect(milkItem).toBeInTheDocument();
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Unable to write list to localStorage.',
+      expect.any(Error)
+    );
+
+    storageSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
+
   it('filters the list live while typing a new item', async () => {
     render(<FastList />);
 

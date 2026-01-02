@@ -15,11 +15,12 @@ export type ShoppingItem = {
     completed: boolean;
 };
 
-export type AlertType = 'danger' | 'success';
-export const AlertTypes: Record<'DANGER' | 'SUCCESS', AlertType> = {
+export const AlertTypes = {
     DANGER: 'danger',
     SUCCESS: 'success',
-};
+} as const;
+
+export type AlertType = typeof AlertTypes[keyof typeof AlertTypes];
 
 export type ConsentPreference = 'granted' | 'denied' | null;
 
