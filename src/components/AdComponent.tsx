@@ -1,4 +1,5 @@
 import { FunctionComponent, useEffect } from 'react';
+import { useI18n } from '../i18n';
 
 const AD_CLIENT = 'ca-pub-7102876575671556';
 const AD_SLOT = '5203535222';
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const AdComponent: FunctionComponent<Props> = ({ consent }) => {
+    const { t } = useI18n();
     const isProduction = process.env.NODE_ENV === 'production';
 
     useEffect(() => {
@@ -34,7 +36,7 @@ const AdComponent: FunctionComponent<Props> = ({ consent }) => {
     if (!isProduction || !consent) return null;
 
     return (
-        <div className="ad-container" aria-label="Advertisement">
+        <div className="ad-container" aria-label={t('ad.label')}>
             <ins
                 className="adsbygoogle"
                 style={{ display: 'block', textAlign: 'center', minHeight: '90px' }}

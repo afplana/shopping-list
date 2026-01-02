@@ -516,11 +516,16 @@ Grocery List
   background: var(--clr-white);
   border-bottom: 1px solid #ddd;
   padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .nav-links {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .nav-links a {
@@ -531,6 +536,20 @@ Grocery List
 
 .nav-links a:hover {
   color: var(--clr-primary-4);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.language-select {
+  border-radius: var(--radius);
+  border: 1px solid var(--clr-grey-6);
+  padding: 0.25rem 0.5rem;
+  background: var(--clr-white);
+  color: var(--clr-grey-1);
 }
 
 .ad-container {

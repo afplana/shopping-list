@@ -5,6 +5,7 @@ import AdComponent from '../components/AdComponent';
 import ConsentBanner from '../components/ConsentBanner';
 
 import { ShoppingItem, AlertStatus, AlertType, AlertTypes, ConsentPreference, CATEGORIES, Category } from '../types';
+import { useI18n } from '../i18n';
 
 const STORAGE_KEY = 'list';
 const CONSENT_KEY = 'adsConsent';
@@ -45,6 +46,7 @@ const alertStatus: AlertStatus = { show: false, msg: '', type: null };
 const editingId: string = '';
 
 const FastList: FunctionComponent = () => {
+    const { t } = useI18n();
     const [name, setName] = useState('');
     const [category, setCategory] = useState<Category>('Grocery');
     const [list, setList] = useState(getLocalStorage);
@@ -59,7 +61,7 @@ const FastList: FunctionComponent = () => {
         e.preventDefault();
         const trimmedName = name.trim();
         if (!trimmedName) {
-            showAlert(true, AlertTypes.DANGER, 'please enter value');
+            showAlert(true, AlertTypes.DANGER, t('fastlist.alert.enterValue'));
             return;
         }
 
@@ -67,7 +69,7 @@ const FastList: FunctionComponent = () => {
             (it) => it.title.toLowerCase() === trimmedName.toLowerCase() && it.id !== editID
         );
         if (duplicate) {
-            showAlert(true, AlertTypes.DANGER, 'item already exists');
+            showAlert(true, AlertTypes.DANGER, t('fastlist.alert.duplicate'));
             return;
         }
 
@@ -82,9 +84,9 @@ const FastList: FunctionComponent = () => {
             setCategory('Grocery');
             setEditID('');
             setIsEditing(false);
-            showAlert(true, AlertTypes.SUCCESS, 'value updated');
+            showAlert(true, AlertTypes.SUCCESS, t('fastlist.alert.updated'));
         } else {
-            showAlert(true, AlertTypes.SUCCESS, 'item added to the list');
+            showAlert(true, AlertTypes.SUCCESS, t('fastlist.alert.added'));
             const newItem: ShoppingItem = { id: new Date().getTime().toString(), title: trimmedName, category, completed: false };
             setList([...list, newItem]);
             setName('');
@@ -95,19 +97,19 @@ const FastList: FunctionComponent = () => {
     const showAlert = (show = false, type: AlertType | null = null, msg = '') => setAlert({ show, type, msg });
 
     const clearList = () => {
-        showAlert(true, AlertTypes.DANGER, 'empty list');
+        showAlert(true, AlertTypes.DANGER, t('fastlist.alert.empty'));
         setList(emptyShoppingItems);
     };
 
     const removeItem = (id: string) => {
-        showAlert(true, AlertTypes.DANGER, 'item removed');
+        showAlert(true, AlertTypes.DANGER, t('fastlist.alert.removed'));
         setList(list.filter((item) => item.id !== id));
     };
 
     const editItem = (id: string) => {
         const selectedItem: ShoppingItem | undefined = list.find((item) => item.id === id);
         if (!selectedItem) {
-            showAlert(true, AlertTypes.DANGER, 'item not found');
+            showAlert(true, AlertTypes.DANGER, t('fastlist.alert.notFound'));
             return;
         }
         setIsEditing(true);
@@ -122,7 +124,7 @@ const FastList: FunctionComponent = () => {
 
     const clearCompleted = () => {
         setList(list.filter((item) => !item.completed));
-        showAlert(true, AlertTypes.SUCCESS, 'completed items cleared');
+        showAlert(true, AlertTypes.SUCCESS, t('fastlist.alert.clearedCompleted'));
     };
 
     useEffect(() => {
@@ -160,22 +162,22 @@ const FastList: FunctionComponent = () => {
         <section className="section-center">
             <form onSubmit={handleSubmit} className="grocery-form">
                 {alert.show && <Alert {...alert} removeAlert={showAlert} itemList={list} />}
-                <h3>Fast Items</h3>
+                <h3>{t('fastlist.title')}</h3>
                 <div className="form-control">
-                    <label htmlFor="item-input" className="sr-only">Item name</label>
+                    <label htmlFor="item-input" className="sr-only">{t('fastlist.itemNameLabel')}</label>
                     <input
                         id="item-input"
                         type="text"
                         className="grocery"
-                        placeholder="e.g. eggs"
+                        placeholder={t('fastlist.placeholder')}
                         value={name}
                         autoFocus
                         onChange={(e) => setName(e.target.value)}
                     />
-                    <label htmlFor="category-select" className="sr-only">Item category</label>
+                    <label htmlFor="category-select" className="sr-only">{t('fastlist.itemCategoryLabel')}</label>
                     <select
                         id="category-select"
-                        aria-label="Item category"
+                        aria-label={t('fastlist.itemCategoryLabel')}
                         className="category-select"
                         value={category}
                         onChange={(e) => setCategory(e.target.value as Category)}
@@ -185,14 +187,14 @@ const FastList: FunctionComponent = () => {
                         ))}
                     </select>
                     <button type="submit" className="submit-btn">
-                        {isEditing ? 'edit' : 'submit'}
+                        {isEditing ? t('fastlist.edit') : t('fastlist.submit')}
                     </button>
                 </div>
             </form>
 
             <div className="controls-row">
                 <div className="quick-add">
-                    <span className="quick-add-label">Quick add:</span>
+                    <span className="quick-add-label">{t('fastlist.quickAdd')}</span>
                     {['Milk', 'Bread', 'Shampoo', 'Soap', 'Batteries'].map((item) => (
                         <button
                             key={item}
@@ -224,7 +226,7 @@ const FastList: FunctionComponent = () => {
                 </div>
                 <label className="toggle">
                     <input type="checkbox" checked={hideCompleted} onChange={(e) => setHideCompleted(e.target.checked)} />
-                    <span>Hide completed</span>
+                    <span>{t('fastlist.hideCompleted')}</span>
                 </label>
             </div>
 
@@ -232,8 +234,8 @@ const FastList: FunctionComponent = () => {
                 <div className="grocery-container">
                     <List items={filteredList} removeItem={removeItem} editItem={editItem} toggleComplete={toggleComplete} />
                     <div className="actions-row">
-                        <button className="clear-btn" onClick={clearList}>clear all</button>
-                        <button className="clear-btn" onClick={clearCompleted}>clear completed</button>
+                        <button className="clear-btn" onClick={clearList}>{t('fastlist.clearAll')}</button>
+                        <button className="clear-btn" onClick={clearCompleted}>{t('fastlist.clearCompleted')}</button>
                     </div>
                 </div>
             )}

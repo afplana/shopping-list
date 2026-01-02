@@ -1,24 +1,25 @@
-const Home: React.FC = () => (
-    <main className="content-page">
-        <h1>Welcome to Fast-List</h1>
-        <p>
-            Fast-List is a minimalist, in-browser shopping-list tool designed for speed and simplicity.
-            No sign-ups, no cloud backend—just open the app, add your items, and check them off as you go.
-        </p>
-        <p>
-            Your list is stored in your browser session, so it’s always at your fingertips.
-            Head over to the <a href="/fast-list">List App</a> to try it now!
-        </p>
-        <h2>Why Fast-List?</h2>
-        <ul>
-            <li>Zero-configuration: works instantly on desktop or mobile.</li>
-            <li>Lightweight: under 50 KB of JavaScript—loads in milliseconds.</li>
-            <li>Privacy-first: your data never leaves your browser.</li>
-        </ul>
-        <p>
-            Fast-List is perfect for grocery shopping, to-do lists, packing checklists,
-            or any quick list you need. No distractions, no login walls—just a fast list.
-        </p>
-    </main>
-);
+import { Link } from 'react-router-dom';
+import { useI18n } from '../i18n';
+
+const Home: React.FC = () => {
+    const { t } = useI18n();
+
+    return (
+        <main className="content-page">
+            <h1>{t('home.title')}</h1>
+            <p>{t('home.intro')}</p>
+            <p>
+                {t('home.storage')} {t('home.linkIntro')}{' '}
+                <Link to="/">{t('home.linkText')}</Link> {t('home.linkOutro')}
+            </p>
+            <h2>{t('home.whyTitle')}</h2>
+            <ul>
+                <li>{t('home.why.zeroConfig')}</li>
+                <li>{t('home.why.lightweight')}</li>
+                <li>{t('home.why.privacy')}</li>
+            </ul>
+            <p>{t('home.outro')}</p>
+        </main>
+    );
+};
 export default Home;

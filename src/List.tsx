@@ -2,6 +2,7 @@ import { FunctionComponent } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 
 import { ShoppingItem } from './types';
+import { useI18n } from './i18n';
 
 interface Props {
     items: ShoppingItem[];
@@ -11,13 +12,19 @@ interface Props {
 }
 
 const List: FunctionComponent<Props> = ({ items, removeItem, editItem, toggleComplete }) => {
+    const { t } = useI18n();
     return <div className="grocery-list">
         {items.map((item) => {
             const { id, title, category, completed } = item;
             return (
                 <article key={id} className="grocery-item">
                     <label className="checkbox">
-                        <input type="checkbox" checked={completed} onChange={() => toggleComplete(id)} aria-label={`Mark ${title} as ${completed ? 'not done' : 'done'}`} />
+                        <input
+                            type="checkbox"
+                            checked={completed}
+                            onChange={() => toggleComplete(id)}
+                            aria-label={completed ? t('fastlist.markNotDone', { title }) : t('fastlist.markDone', { title })}
+                        />
                     </label>
                     <div className="item-content">
                         <p className={`title ${completed ? 'title-completed' : ''}`}>{title}</p>
@@ -27,7 +34,7 @@ const List: FunctionComponent<Props> = ({ items, removeItem, editItem, toggleCom
                         <button
                             type="button"
                             className="edit-btn"
-                            aria-label={`Edit ${title}`}
+                            aria-label={t('fastlist.editItem', { title })}
                             onClick={() => editItem(id)}
                         >
                             <FaEdit />
@@ -35,7 +42,7 @@ const List: FunctionComponent<Props> = ({ items, removeItem, editItem, toggleCom
                         <button
                             type="button"
                             className="delete-btn"
-                            aria-label={`Delete ${title}`}
+                            aria-label={t('fastlist.deleteItem', { title })}
                             onClick={() => removeItem(id)}
                         >
                             <FaTrash />
