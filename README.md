@@ -47,7 +47,7 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 
 ## Known Issues & Fixes to Prioritize
 - Ads: `src/components/AdComponent.tsx` injects AdSense without loading the Google script; add the loader, gate ads in development, and add a real consent/opt-in flow (currently only mentioned in Privacy).
-- Analytics/Consent: Privacy page claims Google Analytics usage, but no GA code or consent handling exists; either implement analytics with consent or update the copy.
+- ~~Analytics/Consent: Privacy page claims Google Analytics usage, but no GA code or consent handling exists; either implement analytics with consent or update the copy.~~
 - ~~Persistence: FastList writes to `localStorage` without guards; wrap in try/catch and provide a fallback for SSR/restrictive browsers.~~
 - ~~Validation: Inputs are not trimmed, so blank/whitespace items can be added; `handleSubmit` uses `any` for the event and should be typed.~~
 - ~~Accessibility/UX: Buttons lack aria labels, the form has no labels, nav uses inline styles, and there are no explicit focus/active states beyond defaults.~~
