@@ -6,3 +6,18 @@
   NODE_VERSION = "22"
   REACT_APP_ADSENSE_CLIENT = "ca-pub-7102876575671556"
   REACT_APP_ADSENSE_SLOT = "5203535222"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; script-src 'self' 'unsafe-eval' https://pagead2.googlesyndication.com https://www.googletagservices.com https://tpc.googlesyndication.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.googlesyndication.com https://*.googleusercontent.com; font-src 'self' data:; connect-src 'self'"
