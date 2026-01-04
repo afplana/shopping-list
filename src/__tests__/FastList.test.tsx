@@ -91,6 +91,53 @@ describe('FastList interactions', () => {
     expect(screen.getByRole('button', { name: /delete milk/i })).toBeInTheDocument();
   });
 
+  it('loads items from localStorage on mount', () => {
+    localStorage.setItem(
+      'list',
+      JSON.stringify([{ id: '1', title: 'Milk', category: 'Grocery', completed: false }])
+    );
+
+    render(<FastList />);
+
+    const item = screen.getAllByRole('article').find((node) => within(node).queryByText('Milk'));
+    expect(item).toBeInTheDocument();
+  });
+
+  it('edits an existing item', async () => {
+    render(<FastList />);
+
+    await fillItem('Milk', 'Grocery');
+
+    await userEvent.click(screen.getByRole('button', { name: /edit milk/i }));
+    const input = screen.getByPlaceholderText('e.g. eggs');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'Oat milk');
+    await userEvent.click(screen.getByRole('button', { name: /edit/i }));
+
+    const updatedItem = screen.getAllByRole('article').find((node) => within(node).queryByText('Oat milk'));
+    expect(updatedItem).toBeInTheDocument();
+  });
+
+  it('removes an item from the list', async () => {
+    render(<FastList />);
+
+    await fillItem('Milk', 'Grocery');
+
+    await userEvent.click(screen.getByRole('button', { name: /delete milk/i }));
+    const remaining = screen.queryAllByRole('article');
+    expect(remaining).toHaveLength(0);
+  });
+
+  it('clears all items', async () => {
+    render(<FastList />);
+
+    await fillItem('Milk', 'Grocery');
+    await fillItem('Bread', 'Grocery');
+
+    await userEvent.click(screen.getByRole('button', { name: /clear all/i }));
+    expect(screen.queryAllByRole('article')).toHaveLength(0);
+  });
+
   it('handles localStorage write failures gracefully', async () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const storageSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {

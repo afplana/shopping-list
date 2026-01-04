@@ -53,8 +53,8 @@ To learn React, check out the [React documentation](https://reactjs.org/).
 - ~~Accessibility/UX: Buttons lack aria labels, the form has no labels, nav uses inline styles, and there are no explicit focus/active states beyond defaults.~~
 - ~~Type/Enum coupling: `AlertType.NULL` is an empty string; consider a nullable/union type instead to avoid ambiguity.~~
 - Mobile reuse: Extract list/domain logic, validation, and storage behind adapters so platform-specific UI can reuse it cleanly.
-- Outdated stack: CRA 4 + React 17 + `react-router-dom@6.30.1` still uses `ReactDOM.render`; move to `createRoot` or upgrade to a modern setup (Vite or CRA 5/React 18).
-- Testing: Only default scripts exist; add coverage for add/edit/delete/clear/persist behaviors.
+- ~~Outdated stack: CRA 4 + React 17 + `react-router-dom@6.30.1` still uses `ReactDOM.render`; move to `createRoot` or upgrade to a modern setup (Vite or CRA 5/React 18).~~
+- ~~Testing: Only default scripts exist; add coverage for add/edit/delete/clear/persist behaviors.~~
 - ~~Security/SEO: No Helmet/meta handling, CSP, service worker, or environment separation for ad/analytics keys.~~
 
 ## Mobile App Plan (Android-first)

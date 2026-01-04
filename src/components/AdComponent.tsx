@@ -1,11 +1,6 @@
 import { FunctionComponent, useEffect } from 'react';
 import { useI18n } from '../i18n';
 
-const AD_CLIENT = process.env.REACT_APP_ADSENSE_CLIENT ?? '';
-const AD_SLOT = process.env.REACT_APP_ADSENSE_SLOT ?? '';
-const hasAdsConfig = Boolean(AD_CLIENT && AD_SLOT);
-const ADSENSE_URL = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${AD_CLIENT}`;
-
 interface Props {
     consent: boolean;
 }
@@ -13,6 +8,10 @@ interface Props {
 const AdComponent: FunctionComponent<Props> = ({ consent }) => {
     const { t } = useI18n();
     const isProduction = process.env.NODE_ENV === 'production';
+    const adClient = process.env.REACT_APP_ADSENSE_CLIENT ?? '';
+    const adSlot = process.env.REACT_APP_ADSENSE_SLOT ?? '';
+    const hasAdsConfig = Boolean(adClient && adSlot);
+    const adsenseUrl = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adClient}`;
 
     useEffect(() => {
         if (isProduction && consent && !hasAdsConfig) {
@@ -21,11 +20,11 @@ const AdComponent: FunctionComponent<Props> = ({ consent }) => {
         }
         if (!isProduction || !consent || !hasAdsConfig || typeof window === 'undefined') return;
 
-        const existingScript = document.querySelector<HTMLScriptElement>(`script[src="${ADSENSE_URL}"]`);
+        const existingScript = document.querySelector<HTMLScriptElement>(`script[src="${adsenseUrl}"]`);
         if (!existingScript) {
             const script = document.createElement('script');
             script.async = true;
-            script.src = ADSENSE_URL;
+            script.src = adsenseUrl;
             script.setAttribute('crossorigin', 'anonymous');
             document.head.appendChild(script);
         }
@@ -36,7 +35,7 @@ const AdComponent: FunctionComponent<Props> = ({ consent }) => {
         } catch (e) {
             console.error('AdSense error:', e);
         }
-    }, [consent, isProduction, hasAdsConfig]);
+    }, [adsenseUrl, consent, hasAdsConfig, isProduction]);
 
     if (!isProduction || !consent || !hasAdsConfig) return null;
 
@@ -45,8 +44,8 @@ const AdComponent: FunctionComponent<Props> = ({ consent }) => {
             <ins
                 className="adsbygoogle"
                 style={{ display: 'block', textAlign: 'center', minHeight: '90px' }}
-                data-ad-client={AD_CLIENT}
-                data-ad-slot={AD_SLOT}
+                data-ad-client={adClient}
+                data-ad-slot={adSlot}
                 data-ad-format="auto"
                 data-full-width-responsive="true"
             />
