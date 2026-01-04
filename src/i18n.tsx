@@ -242,8 +242,8 @@ const translate = (language: Language, key: string, vars?: TranslateVars) => {
     return interpolate(template, vars);
 };
 
-const getStoredLanguage = (): Language => {
-    if (typeof window === 'undefined') return 'en';
+const getStoredLanguage = (): Language | null => {
+    if (typeof window === 'undefined') return null;
     try {
         const value = window.localStorage.getItem(STORAGE_KEY);
         if (value === 'en' || value === 'de' || value === 'es') {
@@ -252,6 +252,14 @@ const getStoredLanguage = (): Language => {
     } catch (error) {
         console.warn('Unable to read language from localStorage.', error);
     }
+    return null;
+};
+
+const detectBrowserLanguage = (): Language => {
+    if (typeof window === 'undefined') return 'en';
+    const candidate = window.navigator.language?.toLowerCase() ?? '';
+    if (candidate.startsWith('de')) return 'de';
+    if (candidate.startsWith('es')) return 'es';
     return 'en';
 };
 
@@ -268,7 +276,10 @@ const I18nContext = createContext<I18nContextValue>({
 });
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [language, setLanguageState] = useState<Language>(getStoredLanguage);
+    const [language, setLanguageState] = useState<Language>(() => {
+        const stored = getStoredLanguage();
+        return stored ?? detectBrowserLanguage();
+    });
 
     const setLanguage = (next: Language) => {
         setLanguageState(next);
