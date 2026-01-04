@@ -3,4 +3,6 @@
   publish = "build"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
+  REACT_APP_ADSENSE_CLIENT = "ca-pub-7102876575671556"
+  REACT_APP_ADSENSE_SLOT = "5203535222"
