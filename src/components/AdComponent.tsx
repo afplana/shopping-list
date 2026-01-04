@@ -1,8 +1,9 @@
 import { FunctionComponent, useEffect } from 'react';
 import { useI18n } from '../i18n';
 
-const AD_CLIENT = 'ca-pub-7102876575671556';
-const AD_SLOT = '5203535222';
+const AD_CLIENT = process.env.REACT_APP_ADSENSE_CLIENT ?? '';
+const AD_SLOT = process.env.REACT_APP_ADSENSE_SLOT ?? '';
+const hasAdsConfig = Boolean(AD_CLIENT && AD_SLOT);
 const ADSENSE_URL = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${AD_CLIENT}`;
 
 interface Props {
@@ -14,7 +15,11 @@ const AdComponent: FunctionComponent<Props> = ({ consent }) => {
     const isProduction = process.env.NODE_ENV === 'production';
 
     useEffect(() => {
-        if (!isProduction || !consent || typeof window === 'undefined') return;
+        if (isProduction && consent && !hasAdsConfig) {
+            console.warn('AdSense configuration missing. Set REACT_APP_ADSENSE_CLIENT and REACT_APP_ADSENSE_SLOT.');
+            return;
+        }
+        if (!isProduction || !consent || !hasAdsConfig || typeof window === 'undefined') return;
 
         const existingScript = document.querySelector<HTMLScriptElement>(`script[src="${ADSENSE_URL}"]`);
         if (!existingScript) {
@@ -31,9 +36,9 @@ const AdComponent: FunctionComponent<Props> = ({ consent }) => {
         } catch (e) {
             console.error('AdSense error:', e);
         }
-    }, [consent, isProduction]);
+    }, [consent, isProduction, hasAdsConfig]);
 
-    if (!isProduction || !consent) return null;
+    if (!isProduction || !consent || !hasAdsConfig) return null;
 
     return (
         <div className="ad-container" aria-label={t('ad.label')}>

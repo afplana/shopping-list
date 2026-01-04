@@ -14,3 +14,11 @@ createRoot(rootElement).render(
     <App />
   </BrowserRouter>
 );
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(`${process.env.PUBLIC_URL}/service-worker.js`).catch((error) => {
+      console.warn('Service worker registration failed.', error);
+    });
+  });
+}
