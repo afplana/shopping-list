@@ -6,9 +6,9 @@ import ConsentBanner from '../components/ConsentBanner';
 
 import { ShoppingItem, AlertStatus, AlertType, AlertTypes, ConsentPreference, CATEGORIES, Category } from '../types';
 import { useI18n } from '../i18n';
+import { getStoredConsent, setStoredConsent } from '../shared/consent';
 
 const STORAGE_KEY = 'list';
-const CONSENT_KEY = 'adsConsent';
 const migrateItem = (item: ShoppingItem | any): ShoppingItem => ({
     id: item.id,
     title: item.title,
@@ -27,20 +27,6 @@ const getLocalStorage: (() => ShoppingItem[]) = () => {
     }
 };
 
-const getConsentPreference = (): ConsentPreference => {
-    if (typeof window === 'undefined') return null;
-    try {
-        const value = window.localStorage.getItem(CONSENT_KEY);
-        if (value === 'granted' || value === 'denied') {
-            return value;
-        }
-        return null;
-    } catch (error) {
-        console.warn('Unable to read consent from localStorage, defaulting to null.', error);
-        return null;
-    }
-};
-
 const emptyShoppingItems: ShoppingItem[] = [];
 const alertStatus: AlertStatus = { show: false, msg: '', type: null };
 const editingId: string = '';
@@ -53,7 +39,7 @@ const FastList: FunctionComponent = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editID, setEditID] = useState(editingId);
     const [alert, setAlert] = useState(alertStatus);
-    const [adsConsent, setAdsConsent] = useState<ConsentPreference>(getConsentPreference);
+    const [adsConsent, setAdsConsent] = useState<ConsentPreference>(getStoredConsent);
     const [filterCategory, setFilterCategory] = useState<Category | 'All'>('All');
     const [hideCompleted, setHideCompleted] = useState(false);
 
@@ -147,15 +133,7 @@ const FastList: FunctionComponent = () => {
 
     const handleConsentChange = (value: ConsentPreference) => {
         setAdsConsent(value);
-        try {
-            if (value) {
-                window.localStorage.setItem(CONSENT_KEY, value);
-            } else {
-                window.localStorage.removeItem(CONSENT_KEY);
-            }
-        } catch (error) {
-            console.warn('Unable to persist consent preference.', error);
-        }
+        setStoredConsent(value);
     };
 
     return (
