@@ -7,35 +7,19 @@ import ConsentBanner from '../components/ConsentBanner';
 import { ShoppingItem, AlertStatus, AlertType, AlertTypes, ConsentPreference, CATEGORIES, Category } from '../types';
 import { useI18n } from '../i18n';
 import { getStoredConsent, setStoredConsent } from '../shared/consent';
+import { addItem, clearCompletedItems, filterList, findItem, removeItemById, toggleCompleteById, updateItemDetails, validateName } from '../shared/listLogic';
+import { readList, writeList } from '../shared/listStorage';
+import { getBrowserStorage } from '../shared/storage';
 
-const STORAGE_KEY = 'list';
-const migrateItem = (item: ShoppingItem | any): ShoppingItem => ({
-    id: item.id,
-    title: item.title,
-    category: item.category && CATEGORIES.includes(item.category) ? item.category : 'Other',
-    completed: typeof item.completed === 'boolean' ? item.completed : false,
-});
-
-const getLocalStorage: (() => ShoppingItem[]) = () => {
-    if (typeof window === 'undefined') return [];
-    try {
-        const list = window.localStorage.getItem(STORAGE_KEY);
-        return list ? (JSON.parse(list) as ShoppingItem[]).map(migrateItem) : [];
-    } catch (error) {
-        console.warn('Unable to read localStorage, falling back to empty list.', error);
-        return [];
-    }
-};
-
-const emptyShoppingItems: ShoppingItem[] = [];
 const alertStatus: AlertStatus = { show: false, msg: '', type: null };
 const editingId: string = '';
 
 const FastList: FunctionComponent = () => {
     const { t } = useI18n();
+    const storage = useMemo(() => getBrowserStorage(), []);
     const [name, setName] = useState('');
     const [category, setCategory] = useState<Category>('Grocery');
-    const [list, setList] = useState(getLocalStorage);
+    const [list, setList] = useState(() => readList(storage, CATEGORIES));
     const [isEditing, setIsEditing] = useState(false);
     const [editID, setEditID] = useState(editingId);
     const [alert, setAlert] = useState(alertStatus);
@@ -45,27 +29,19 @@ const FastList: FunctionComponent = () => {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const trimmedName = name.trim();
-        if (!trimmedName) {
-            showAlert(true, AlertTypes.DANGER, t('fastlist.alert.enterValue'));
+        const validation = validateName(name, list, editID);
+        if (!validation.ok) {
+            showAlert(
+                true,
+                AlertTypes.DANGER,
+                validation.reason === 'empty' ? t('fastlist.alert.enterValue') : t('fastlist.alert.duplicate')
+            );
             return;
         }
 
-        const duplicate = list.some(
-            (it) => it.title.toLowerCase() === trimmedName.toLowerCase() && it.id !== editID
-        );
-        if (duplicate) {
-            showAlert(true, AlertTypes.DANGER, t('fastlist.alert.duplicate'));
-            return;
-        }
-
+        const trimmedName = validation.trimmed;
         if (isEditing) {
-            setList(list.map((it) => {
-                if (it.id === editID) {
-                    return { ...it, title: trimmedName, category };
-                }
-                return it;
-            }));
+            setList(updateItemDetails(list, editID, trimmedName, category));
             setName('');
             setCategory('Grocery');
             setEditID('');
@@ -73,8 +49,7 @@ const FastList: FunctionComponent = () => {
             showAlert(true, AlertTypes.SUCCESS, t('fastlist.alert.updated'));
         } else {
             showAlert(true, AlertTypes.SUCCESS, t('fastlist.alert.added'));
-            const newItem: ShoppingItem = { id: new Date().getTime().toString(), title: trimmedName, category, completed: false };
-            setList([...list, newItem]);
+            setList(addItem(list, trimmedName, category));
             setName('');
             setCategory('Grocery');
         }
@@ -84,16 +59,16 @@ const FastList: FunctionComponent = () => {
 
     const clearList = () => {
         showAlert(true, AlertTypes.DANGER, t('fastlist.alert.empty'));
-        setList(emptyShoppingItems);
+        setList([]);
     };
 
     const removeItem = (id: string) => {
         showAlert(true, AlertTypes.DANGER, t('fastlist.alert.removed'));
-        setList(list.filter((item) => item.id !== id));
+        setList(removeItemById(list, id));
     };
 
     const editItem = (id: string) => {
-        const selectedItem: ShoppingItem | undefined = list.find((item) => item.id === id);
+        const selectedItem: ShoppingItem | undefined = findItem(list, id);
         if (!selectedItem) {
             showAlert(true, AlertTypes.DANGER, t('fastlist.alert.notFound'));
             return;
@@ -105,30 +80,20 @@ const FastList: FunctionComponent = () => {
     };
 
     const toggleComplete = (id: string) => {
-        setList(list.map((item) => item.id === id ? { ...item, completed: !item.completed } : item));
+        setList(toggleCompleteById(list, id));
     };
 
     const clearCompleted = () => {
-        setList(list.filter((item) => !item.completed));
+        setList(clearCompletedItems(list));
         showAlert(true, AlertTypes.SUCCESS, t('fastlist.alert.clearedCompleted'));
     };
 
     useEffect(() => {
-        try {
-            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-        } catch (error) {
-            console.warn('Unable to write list to localStorage.', error);
-        }
-    }, [list]);
+        writeList(storage, list);
+    }, [list, storage]);
 
     const filteredList = useMemo(() => {
-        const term = name.trim().toLowerCase();
-        return list.filter((item) => {
-            const categoryMatch = filterCategory === 'All' ? true : item.category === filterCategory;
-            const completionMatch = hideCompleted ? !item.completed : true;
-            const searchMatch = term ? item.title.toLowerCase().includes(term) : true;
-            return categoryMatch && completionMatch && searchMatch;
-        });
+        return filterList(list, { term: name, category: filterCategory, hideCompleted });
     }, [filterCategory, hideCompleted, list, name]);
 
     const handleConsentChange = (value: ConsentPreference) => {
